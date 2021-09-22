@@ -21,7 +21,6 @@ steps:
 
 - script: |
     python -m pip install --upgrade pip
-    pip install -r requirements.txt
   displayName: 'Install dependencies'
 
 - script: |
@@ -37,7 +36,7 @@ steps:
           
           echo 'retrieve git log'
           
-              git log 100 >$(Build.BinariesDirectory)/git_log.txt
+              git log -100 >$(Build.BinariesDirectory)/git_log.txt
     - task: ArchiveFiles@2
       inputs:
         rootFolderOrFile: '$(Build.BinariesDirectory)'
