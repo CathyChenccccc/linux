@@ -27,20 +27,20 @@ steps:
     pip install pytest pytest-azurepipelines
     import argparse
     import re
-
-    - task: Bash@3
-      inputs:
-        targetType: 'inline'
-        script: |
-          echo 'retrieve git log'
-          #git log -100 >$(Build.BinariesDirectory)/git_log.txt
-    - task: ArchiveFiles@2
-      inputs:
-        rootFolderOrFile: '$(Build.BinariesDirectory)'
-        includeRootFolder: true
-        archiveType: 'zip'
-        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
-        replaceExistingArchive: true
-    
     
   displayName: 'parse_git_log'
+  
+- task: Bash@3
+  inputs:
+    targetType: 'inline'
+    script: |
+      echo 'retrieve git log'
+      git log -100 >$(Build.BinariesDirectory)/git_log.txt
+      
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(Build.BinariesDirectory)'
+    includeRootFolder: true
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+    replaceExistingArchive: true
