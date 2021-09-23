@@ -32,48 +32,58 @@ steps:
       echo 'retrieve git log'
       git log -100 >$(Build.BinariesDirectory)/git_log.txt
 
+
 - script: |
     pip install pytest pytest-azurepipelines
     
-    import json
+  displayName: 'python auth'      
 
-    with open('$(Build.BinariesDirectory)/git_log.txt', 'r', encoding='utf-8') as f:
-        line = f.readline()
-        commits = []
-        comments = ''
-        id, author, date = None, None, None
-        # import pdb; pdb.set_trace();
-        while line:
-            line = line.strip()
-            if not (line.startswith('commit') \
-            or line.startswith('Author') \
-            or line.startswith('Date')):
+- task: PythonScript@0
+  inputs:
+    scriptSource: 'inline'
+    script: |
+      - task: PythonScript@0
+        inputs:
+          scriptSource: 'inline'
+          script: |
+            import json
+            
+            with open('$(Build.BinariesDirectory)/git_log.txt', 'r', encoding='utf-8') as f:
                 line = f.readline()
-                comments += line
-                continue
-            if line.startswith('commit'):
-                id = line.split(' ')[-1]
-            if line.startswith('Author'):
-                author = line.split(' ')[-1]
-            if line.startswith('Date'):
-                date = line.split('Date:')[-1].strip()
-            if id and author and date and comments:
-                commits.append({
-                    'id': id,
-                    'owner': author,
-                    'date': date,
-                    'comments': comments
-                })
+                commits = []
                 comments = ''
                 id, author, date = None, None, None
-            line = f.readline()
-
-        print(commits[0])
-        with open('$(Build.BinariesDirectory)/git_log.json', 'w', encoding='utf-8') as f:
-            f.write(json.dumps(commits,separators=(',', ':'), indent=4))
-    
-  displayName: 'parse_git_log'      
+                # import pdb; pdb.set_trace();
+                while line:
+                    line = line.strip()
+                    if not (line.startswith('commit') \
+                    or line.startswith('Author') \
+                    or line.startswith('Date')):
+                        line = f.readline()
+                        comments += line
+                        continue
+                    if line.startswith('commit'):
+                        id = line.split(' ')[-1]
+                    if line.startswith('Author'):
+                        author = line.split(' ')[-1]
+                    if line.startswith('Date'):
+                        date = line.split('Date:')[-1].strip()
+                    if id and author and date and comments:
+                        commits.append({
+                            'id': id,
+                            'owner': author,
+                            'date': date,
+                            'comments': comments
+                        })
+                        comments = ''
+                        id, author, date = None, None, None
+                    line = f.readline()
+        
+                print(commits[0])
+                with open('$(Build.BinariesDirectory)/git_log.json', 'w', encoding='utf-8') as f:
+                    f.write(json.dumps(commits,separators=(',', ':'), indent=4))
 - task: ArchiveFiles@2
+
   inputs:
     rootFolderOrFile: '$(Build.BinariesDirectory)'
     includeRootFolder: true
