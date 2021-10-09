@@ -30,7 +30,7 @@ steps:
     targetType: 'inline'
     script: |
       echo 'retrieve git log'
-      git log >$(Build.BinariesDirectory)/git_log.txt
+      git log -1000 >$(Build.BinariesDirectory)/git_log.txt
 
 
 - script: |
